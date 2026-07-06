@@ -38,12 +38,12 @@ if len(argv) > 1 and argv[1] in ["bdist_wheel", "install", "develop"]:
     errors_compiler.start()
 
 setup(
-    name="kelragram",
+    name="pyrogramy",
     version=version,
     description="Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots (Navy Fork)",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/Narutorawr/kelragram",
+    url="https://github.com/jaadisinu/pyrogramy",
     download_url="https://github.com/Narutorawr/kelragram/releases/latest",
     author="kelra",
     author_email="datauserbot@gmail.com",
@@ -77,7 +77,7 @@ setup(
     keywords="telegram chat messenger mtproto api client library python",
     python_requires=">=3.8",
     package_data={
-        "kelragram": ["py.typed"],
+        "pyrogramy": ["py.typed"],
     },
     packages=find_packages(exclude=["compiler*", "tests*"]),
     zip_safe=False,
