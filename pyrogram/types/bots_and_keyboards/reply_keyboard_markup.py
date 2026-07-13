@@ -25,11 +25,40 @@ from ..object import Object
 
 
 class ReplyKeyboardMarkup(Object):
-    """A custom keyboard with reply options."""
+    """A custom keyboard with reply options.
+
+    Parameters:
+        keyboard (List of List of :obj:`~pyrogram_styled.types.KeyboardButton`):
+            List of button rows, each represented by a List of KeyboardButton objects.
+
+        is_persistent (``bool``, *optional*):
+            Requests clients to always show the keyboard when the regular keyboard is hidden.
+            Defaults to false, in which case the custom keyboard can be hidden and opened with a keyboard icon.
+
+        resize_keyboard (``bool``, *optional*):
+            Requests clients to resize the keyboard vertically for optimal fit (e.g., make the keyboard smaller if
+            there are just two rows of buttons). Defaults to false, in which case the custom keyboard is always of
+            the same height as the app's standard keyboard.
+
+        one_time_keyboard (``bool``, *optional*):
+            Requests clients to hide the keyboard as soon as it's been used. The keyboard will still be available,
+            but clients will automatically display the usual letter-keyboard in the chat – the user can press a
+            special button in the input field to see the custom keyboard again. Defaults to false.
+
+        selective (``bool``, *optional*):
+            Use this parameter if you want to show the keyboard to specific users only. Targets:
+            1) users that are @mentioned in the text of the Message object;
+            2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
+            Example: A user requests to change the bot's language, bot replies to the request with a keyboard to
+            select the new language. Other users in the group don't see the keyboard.
+
+        placeholder (``str``, *optional*):
+            The placeholder to be shown in the input field when the keyboard is active; 1-64 characters.
+    """
 
     def __init__(
         self,
-        keyboard: List[List[Union["types.KeyboardButton", str, tuple]]],
+        keyboard: List[List[Union["types.KeyboardButton", str]]],
         is_persistent: bool = None,
         resize_keyboard: bool = None,
         one_time_keyboard: bool = None,
@@ -51,8 +80,10 @@ class ReplyKeyboardMarkup(Object):
 
         for i in kb.rows:
             row = []
+
             for j in i.buttons:
                 row.append(types.KeyboardButton.read(j))
+
             keyboard.append(row)
 
         return ReplyKeyboardMarkup(
@@ -65,28 +96,14 @@ class ReplyKeyboardMarkup(Object):
         )
 
     async def write(self, _: "pyrogram.Client"):
-        processed_rows = []
-        
-        for row in self.keyboard:
-            processed_buttons = []
-            for btn in row:
-                # Jika formatnya tuple (text, style)
-                if isinstance(btn, tuple):
-                    text, style = btn[0], btn[1]
-                    # Membuat objek KeyboardButton dengan parameter style custom
-                    button_obj = types.KeyboardButton(text=text, style=style)
-                    processed_buttons.append(button_obj.write())
-                # Jika hanya string biasa
-                elif isinstance(btn, str):
-                    processed_buttons.append(types.KeyboardButton(btn).write())
-                # Jika sudah merupakan objek KeyboardButton
-                else:
-                    processed_buttons.append(btn.write())
-                    
-            processed_rows.append(raw.types.KeyboardButtonRow(buttons=processed_buttons))
-
         return raw.types.ReplyKeyboardMarkup(
-            rows=processed_rows,
+            rows=[raw.types.KeyboardButtonRow(
+                buttons=[
+                    types.KeyboardButton(j).write()
+                    if isinstance(j, str) else j.write()
+                    for j in i
+                ]
+            ) for i in self.keyboard],
             resize=self.resize_keyboard or None,
             single_use=self.one_time_keyboard or None,
             selective=self.selective or None,
